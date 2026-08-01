@@ -1,0 +1,88 @@
+name: Generate Profile Summary Cards
+
+on:
+  schedule:
+    # Daily at 03:17 UTC
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/summary-cards.yml"
+
+jobs:
+  build:
+    name: generate-github-profile-summary-cards
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: vn7n24fzkq/github-profile-summary-cards@release
+        env:
+          # Without a secret of your own this runs on the action token, which only
+          # sees PUBLIC data. To include private repos in the numbers, add a PAT
+          # (classic: repo scope) as the secret SUMMARY_GITHUB_TOKEN - it is then
+          # picked up automatically.
+          GITHUB_TOKEN: ${{ secrets.SUMMARY_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+        with:
+          USERNAME: ${{ github.repository_owner }}
+          BRANCH_NAME: "main"
+          # UTC_OFFSET is deliberately unset: only the productive-time card needs
+          # it, and that card publishes which hours of the day work happens. The
+          # card is not embedded in the README.
+
+      # Two cleanup jobs in ONE commit, so a run does not produce two commits:
+      #
+      # 1) The action always generates 4-productive-time.svg, even though the
+      #    README does not embed it. Left alone the file would sit in a public
+      #    repo advertising working hours. That matters even more if a PAT is
+      #    added later, because commit times from private repos would feed into it.
+      #
+      # 2) The language line in the typing banner is reshuffled so the profile
+      #    does not always show the same five. The pool holds established
+      #    languages only - SQF and EnforceScript stay out on purpose, they are
+      #    already badges in the tech stack.
+      #
+      # On sed -i: README.md is pinned to eol=lf in .gitattributes. Without that,
+      # sed on a CRLF checkout rewrites the line endings of the WHOLE file and
+      # every run produces a 177-line diff instead of a one-line change.
+      - name: Tidy cards and shuffle banner languages
+        run: |
+          git pull --quiet --rebase origin main
+          CHANGED=0
+
+          if compgen -G "profile-summary-card-output/*/4-productive-time.svg" > /dev/null; then
+            git rm --quiet profile-summary-card-output/*/4-productive-time.svg
+            echo "removed productive-time cards"
+            CHANGED=1
+          else
+            echo "no productive-time cards present"
+          fi
+
+          POOL=(TypeScript JavaScript Rust Go Python Java Kotlin Swift Dart Lua
+                'C%2B%2B' 'C%23' C SQL Shell Bash)
+          SEG=$(printf '%s\n' "${POOL[@]}" | shuf -n 5 | paste -sd' ' - \
+                | sed 's/ /+%E2%80%A2+/g')
+          # replaces only the last segment after the final ';' in the lines= parameter
+          sed -i "s|\(lines=[^\"]*;\)[^\"]*|\1${SEG}|" README.md
+          if ! git diff --quiet README.md; then
+            git add README.md
+            echo "reshuffled banner languages: ${SEG}"
+            CHANGED=1
+          else
+            echo "banner languages unchanged"
+          fi
+
+          if [ "$CHANGED" = "1" ]; then
+            git -c user.name="github-actions[bot]" \
+                -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+                commit --quiet -m "chore: tidy generated cards and shuffle banner languages"
+            git push --quiet origin main
+          else
+            echo "nothing to commit"
+          fi
+        shell: bash

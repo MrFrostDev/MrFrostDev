@@ -1,0 +1,12 @@
+# README.md is edited by the workflow with sed. Pin it to LF so `sed -i` does not
+# rewrite the line endings of the entire file, which would turn a one-line change
+# into a 177-line diff on every run.
+README.md          text eol=lf
+.github/**/*.yml   text eol=lf
+
+# Generated summary cards: plain text.
+*.svg              text eol=lf
+
+# Do not normalise the banner and footer. Those files are validated as XML, so git
+# should leave the bytes exactly as they were checked.
+assets/*.svg       -text
