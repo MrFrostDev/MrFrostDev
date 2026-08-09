@@ -46,7 +46,7 @@
 
 <a href="https://github.com/MrFrostDev">
   <img
-    src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=3000&pause=800&color=4FC3F7&center=true&vCenter=true&width=600&lines=Hi+%F0%9F%91%8B+I'm+MrFrost;Full-stack+developer+%26+tooling+builder;Web+%E2%80%A2+Mobile+%E2%80%A2+Backend+%E2%80%A2+AI;Go+%E2%80%A2+Kotlin+%E2%80%A2+C%23+%E2%80%A2+SQL+%E2%80%A2+Dart"
+    src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=3000&pause=800&color=4FC3F7&center=true&vCenter=true&width=600&lines=Hi+%F0%9F%91%8B+I'm+MrFrost;Full-stack+developer+%26+tooling+builder;Web+%E2%80%A2+Mobile+%E2%80%A2+Backend+%E2%80%A2+AI;Lua+%E2%80%A2+Java+%E2%80%A2+Python+%E2%80%A2+Bash+%E2%80%A2+Shell"
     alt="Typing SVG"
   />
 </a>
